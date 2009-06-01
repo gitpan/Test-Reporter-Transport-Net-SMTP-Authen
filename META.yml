@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Test-Reporter-Transport-Net-SMTP-Authen
-version:            1.00
+version:            1.01
 abstract:           SMTP transport for Test::Reporter 
 author:
     - A.G. Grishaev <grian@cpan.org>
@@ -10,6 +10,7 @@ configure_requires:
     ExtUtils::MakeMaker:  0
 requires:
     Authen::SASL:    0
+    CPAN::Reporter:  0
     MIME::Base64:    0
     Net::SMTP:       0
     Net::SMTP::TLS:  0

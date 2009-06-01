@@ -9,6 +9,7 @@ use Test::More tests => 1;
 require Net::SMTP;
 require Authen::SASL;
 require MIME::Base64;
+require CPAN::Reporter;
 BEGIN { use_ok('Test::Reporter::Transport::Net::SMTP::Authen') };
 
 #########################
