@@ -3,8 +3,38 @@ use warnings;
 package Test::Reporter::Transport::Net::SMTP::Authen;
 use base 'Test::Reporter::Transport::Net::SMTP';
 use vars qw/$VERSION/;
-$VERSION = '1.01';
+$VERSION = '1.02';
 $VERSION = eval $VERSION;
+use Exporter 'import';
+our @EXPORT_OK=qw(install);
+
+sub install($$$){
+    my ($smtp, $user, $password) = @_;
+    if ( @_ != 3){
+	croak( "Usage: install(\$smtp_server, \$user, \$password)" );
+    };	
+    unless( $ENV{PERL_CPAN_REPORTER_DIR} ||  $ENV{HOME} ){
+	require Carp;
+	croak( "Please define your enviroment variable PERL_CPAN_REPORTER_DIR or HOME" );
+    }
+    my $reporter_folder = $ENV{PERL_CPAN_REPORTER_DIR} ||= $ENV{HOME} . '/.cpanreporter';
+    require File::Path;
+    require Carp;
+    File::Path->import('mkpath');
+    mkpath( $reporter_folder );
+    open my $fh , '>', $reporter_folder .'/config.ini' or Carp::croak( "Can't write config.ini in $reporter_folder $!");
+    $a = select ($fh);
+    print "edit_report=no\n";
+    print "email_from=$user\n";
+    print "send_report=yes\n";
+    print "smtp_server=$smtp\n";
+    print "transport=Net::SMTP::Authen User $user Password $password\n";
+    close $fh or Carp::croak ("Can't finish write $reporter_folder/config.ini $!");
+    select $a;
+    print STDERR "Writen $reporter_folder/config.ini .\n\tType cpan <CR>\n";
+    print STDERR 	"\to conf test_report 1\n";
+    print STDERR 	"\to conf commit\n";
+}
 
 sub new {
     my ($class, @args) = @_;
@@ -136,7 +166,6 @@ sub send {
 	trace();
         $smtp->dataend() or $die->();
 	trace();
-	print STDERR "Data end\n";
         $smtp->quit or $die->();
 	trace();
         1;
@@ -172,7 +201,13 @@ WITH AUTH command
 
 This module transmits a Test::Reporter report using Net::SMTP with authentication if needed.
 
-=head1 USAGE
+=head1 CONFIG create
+
+    # this command will write ~/.cpanconfig/config.ini for you
+    perl -MTest::Reporter::Transport::Net::SMTP::Authen=install -e "install( $smtp_server, $user, $password)" # for Win32
+    perl -MTest::Reporter::Transport::Net::SMTP::Authen=install -e 'install( $smtp_server, $user, $password)' # for Unix
+
+=head1 OTHER USAGE
 
 See L<Test::Reporter> and L<Test::Reporter::Transport> for general usage
 information.
